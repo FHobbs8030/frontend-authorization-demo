@@ -1,3 +1,4 @@
+// src/components/App.jsx
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
@@ -48,6 +49,10 @@ function App() {
 
   return (
     <Routes>
+      <Route
+        index
+        element={<Navigate to={isLoggedIn ? "/ducks" : "/login"} replace />}
+      />
       <Route
         path="/login"
         element={
