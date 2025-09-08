@@ -5,28 +5,31 @@ import MyProfile from "./MyProfile.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import { authorize, register, getMe } from "../utils/auth.js";
 
-function SignIn({ onSubmit }) {
+function SignIn({ onSubmit, error, loading }) {
   return (
     <main className="page">
       <h2>Sign In</h2>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          const username = e.target.username.value;
+          const email = e.target.email.value;
           const password = e.target.password.value;
-          onSubmit({ username, password });
+          onSubmit({ email, password });
         }}
       >
-        <input name="username" placeholder="username" required />
+        <input name="email" type="email" placeholder="email" required />
         <input name="password" type="password" placeholder="password" required />
-        <button type="submit">Sign In</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Signing in..." : "Sign In"}
+        </button>
       </form>
+      {error && <p style={{ color: "crimson", marginTop: 8 }}>{error}</p>}
       <Link to="/signup">Register</Link>
     </main>
   );
 }
 
-function SignUp({ onSubmit }) {
+function SignUp({ onSubmit, error, loading }) {
   return (
     <main className="page">
       <h2>Sign Up</h2>
@@ -42,8 +45,11 @@ function SignUp({ onSubmit }) {
         <input name="username" placeholder="username" required />
         <input name="email" type="email" placeholder="email" required />
         <input name="password" type="password" placeholder="password" required />
-        <button type="submit">Create Account</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Creating..." : "Create Account"}
+        </button>
       </form>
+      {error && <p style={{ color: "crimson", marginTop: 8 }}>{error}</p>}
       <Link to="/signin">Have an account? Sign In</Link>
     </main>
   );
@@ -53,6 +59,8 @@ export default function App() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState({ username: "", email: "" });
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("jwt");
@@ -70,22 +78,43 @@ export default function App() {
       });
   }, [navigate]);
 
-  const handleLogin = async ({ username, password }) => {
-    const { token } = await authorize(username, password);
-    localStorage.setItem("jwt", token);
-    const me = await getMe(token);
-    setUserData({ username: me.name || me.username || "", email: me.email || "" });
-    setIsLoggedIn(true);
-    navigate("/ducks");
+  const handleLogin = async ({ email, password }) => {
+    try {
+      setAuthError("");
+      setAuthLoading(true);
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanPassword = password.trim();
+      const { token } = await authorize(cleanEmail, cleanPassword);
+      localStorage.setItem("jwt", token);
+      const me = await getMe(token);
+      setUserData({ username: me.name || me.username || "", email: me.email || "" });
+      setIsLoggedIn(true);
+      navigate("/ducks");
+    } catch (e) {
+      setAuthError(e.message || "Sign-in failed.");
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   const handleSignUp = async ({ username, email, password }) => {
-    const { token } = await register(username, email, password);
-    localStorage.setItem("jwt", token);
-    const me = await getMe(token);
-    setUserData({ username: me.name || me.username || "", email: me.email || "" });
-    setIsLoggedIn(true);
-    navigate("/ducks");
+    try {
+      setAuthError("");
+      setAuthLoading(true);
+      const cleanName = username.trim();
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanPassword = password.trim();
+      const { token } = await register(cleanName, cleanEmail, cleanPassword);
+      localStorage.setItem("jwt", token);
+      const me = await getMe(token);
+      setUserData({ username: me.name || me.username || "", email: me.email || "" });
+      setIsLoggedIn(true);
+      navigate("/ducks");
+    } catch (e) {
+      setAuthError(e.message || "Sign-up failed.");
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   const handleSignOut = () => {
@@ -123,9 +152,22 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/signin" element={<SignIn onSubmit={handleLogin} />} />
-        <Route path="/signup" element={<SignUp onSubmit={handleSignUp} />} />
-        <Route path="*" element={<Navigate to={isLoggedIn ? "/ducks" : "/signin"} replace />} />
+        <Route
+          path="/signin"
+          element={
+            <SignIn onSubmit={handleLogin} error={authError} loading={authLoading} />
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <SignUp onSubmit={handleSignUp} error={authError} loading={authLoading} />
+          }
+        />
+        <Route
+          path="*"
+          element={<Navigate to={isLoggedIn ? "/ducks" : "/signin"} replace />}
+        />
       </Routes>
     </div>
   );
