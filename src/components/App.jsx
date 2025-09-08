@@ -1,5 +1,5 @@
 // src/components/App.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
 import Ducks from "./Ducks";
@@ -13,6 +13,11 @@ import * as auth from "../utils/auth";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const jwt = localStorage.getItem("jwt");
+    if (jwt) setIsLoggedIn(true);
+  }, []);
 
   const handleRegistration = ({ username, email, password, confirmPassword }) => {
     if (password !== confirmPassword) {
