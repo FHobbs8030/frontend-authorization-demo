@@ -1,4 +1,3 @@
-// src/components/Login.jsx
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import Logo from "./Logo";
@@ -14,7 +13,7 @@ const Login = ({ handleLogin }) => {
   };
 
   const onSubmit = (e) => {
-    e.preventDefault();          // <-- stop default GET submit
+    e.preventDefault();
     setMsg("");
     handleLogin(data).catch((err) => setMsg(String(err)));
   };
@@ -25,33 +24,16 @@ const Login = ({ handleLogin }) => {
       <p className="login__welcome">
         This app contains highly sensitive information. Please sign in or register to access CryptoDucks.
       </p>
-
       <form className="login__form" onSubmit={onSubmit}>
         <label htmlFor="login">Login:</label>
-        <input
-          id="login"
-          name="login"          // matches state key
-          type="text"
-          value={data.login}
-          onChange={handleChange}
-        />
-
+        <input id="login" name="login" type="text" value={data.login} onChange={handleChange} />
         <label htmlFor="password">Password:</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          value={data.password}
-          onChange={handleChange}
-        />
-
+        <input id="password" name="password" type="password" value={data.password} onChange={handleChange} />
         {msg && <p className="login__message">{msg}</p>}
-
         <div className="login__button-container">
           <button type="submit" className="login__link">Log in</button>
         </div>
       </form>
-
       <div className="login__signup">
         <p>Not a member yet?</p>
         <Link to="/register" className="login__register-link">Sign up here</Link>

@@ -1,4 +1,3 @@
-// src/utils/auth.js
 export const BASE_URL = "https://api.nomoreparties.co";
 
 export const register = (username, password, email) => {

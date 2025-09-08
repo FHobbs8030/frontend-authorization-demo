@@ -1,33 +1,32 @@
-import NavBar from "./NavBar";
 import "./styles/MyProfile.css";
 
-function MyProfile({
-  userData = { username: "Username here", email: "Email here" },
-}) {
-  const { username, email } = userData;
+export default function MyProfile({ user }) {
+  const fromStorage = (() => {
+    try {
+      const s = localStorage.getItem("user");
+      return s ? JSON.parse(s) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const effectiveUser = user || fromStorage;
+  const username = effectiveUser?.username ?? "—";
+  const email = effectiveUser?.email ?? "—";
+
   return (
-    <>
-      <NavBar />
-      <div className="my-profile">
-        <div className="my-profile__container">
-          <div className="my-profile__header">
-            <p>My profile</p>
-            <hr className="my-profile__rule" />
-          </div>
-          <div className="my-profile__info">
-            <div className="my-profile__user">
-              <p className="my-profile__key">Username:</p>
-              <p className="my-profile__value">{username}</p>
-            </div>
-            <div className="my-profile__user">
-              <p className="my-profile__key">Email:</p>
-              <p className="my-profile__value">{email}</p>
-            </div>
-          </div>
+    <div className="profile">
+      <h2 className="profile__title">My profile</h2>
+      <div className="profile__card">
+        <div className="profile__row">
+          <span>Username:</span>
+          <span>{username}</span>
+        </div>
+        <div className="profile__row">
+          <span>Email:</span>
+          <span>{email}</span>
         </div>
       </div>
-    </>
+    </div>
   );
 }
-
-export default MyProfile;

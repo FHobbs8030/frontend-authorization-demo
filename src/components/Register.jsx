@@ -10,6 +10,7 @@ const Register = ({ handleRegistration }) => {
     password: "",
     confirmPassword: "",
   });
+  const [msg, setMsg] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,42 +19,21 @@ const Register = ({ handleRegistration }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    handleRegistration(data);
+    setMsg("");
+    handleRegistration(data).catch((err) => setMsg(String(err)));
   };
 
   return (
     <div className="register">
       <Logo title={"CryptoDucks"} />
       <p className="register__welcome">Please register.</p>
-
       <form className="register__form" onSubmit={handleSubmit}>
         <label htmlFor="username">Username:</label>
-        <input
-          id="username"
-          name="username"
-          type="text"
-          value={data.username}
-          onChange={handleChange}
-        />
-
+        <input id="username" name="username" type="text" value={data.username} onChange={handleChange} />
         <label htmlFor="email">Email:</label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          value={data.email}
-          onChange={handleChange}
-        />
-
+        <input id="email" name="email" type="email" value={data.email} onChange={handleChange} />
         <label htmlFor="password">Password:</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          value={data.password}
-          onChange={handleChange}
-        />
-
+        <input id="password" name="password" type="password" value={data.password} onChange={handleChange} />
         <label htmlFor="confirmPassword">Confirm password:</label>
         <input
           id="confirmPassword"
@@ -62,19 +42,14 @@ const Register = ({ handleRegistration }) => {
           value={data.confirmPassword}
           onChange={handleChange}
         />
-
+        {msg && <p className="register__message">{msg}</p>}
         <div className="register__button-container">
-          <button type="submit" className="register__link">
-            Sign up
-          </button>
+          <button type="submit" className="register__link">Sign up</button>
         </div>
       </form>
-
       <div className="register__signin">
         <p>Already a member?</p>
-        <Link to="/login" className="register__login-link">
-          Log in here
-        </Link>
+        <Link to="/login" className="register__login-link">Log in here</Link>
       </div>
     </div>
   );
