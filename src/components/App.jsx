@@ -29,10 +29,18 @@ function App() {
   };
 
   const handleLogin = ({ login, password }) => {
-    return auth.authorize(login, password).then(({ jwt, user }) => {
+    return auth.authorize(login, password).then((payload) => {
+      const jwt = payload?.jwt;
+      const userObj = payload?.user || payload?.data?.user || payload?.userData || null;
+      if (!jwt) return Promise.reject("No token returned from server");
       localStorage.setItem("jwt", jwt);
-      localStorage.setItem("user", JSON.stringify(user));
-      setUser(user);
+      if (userObj) {
+        localStorage.setItem("user", JSON.stringify(userObj));
+        setUser(userObj);
+      } else {
+        localStorage.removeItem("user");
+        setUser(null);
+      }
       setIsLoggedIn(true);
       navigate("/ducks", { replace: true });
     });

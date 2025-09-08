@@ -8,11 +8,16 @@ export const register = (username, password, email) => {
   }).then((res) => (res.ok ? res.json() : Promise.reject(`Error: ${res.status}`)));
 };
 
-// Login (Strapi-style: identifier can be username or email)
 export const authorize = (identifier, password) => {
   return fetch(`${BASE_URL}/auth/local`, {
     method: "POST",
     headers: { Accept: "application/json", "Content-Type": "application/json" },
     body: JSON.stringify({ identifier, password }),
+  }).then((res) => (res.ok ? res.json() : Promise.reject(`Error: ${res.status}`)));
+};
+
+export const getMe = (jwt) => {
+  return fetch(`${BASE_URL}/users/me`, {
+    headers: { Accept: "application/json", Authorization: `Bearer ${jwt}` },
   }).then((res) => (res.ok ? res.json() : Promise.reject(`Error: ${res.status}`)));
 };
