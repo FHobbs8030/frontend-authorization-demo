@@ -3,7 +3,7 @@ import { useState } from "react";
 import Logo from "./Logo";
 import "./styles/Register.css";
 
-const Register = () => {
+const Register = ({ handleRegistration }) => {
   const [data, setData] = useState({
     username: "",
     email: "",
@@ -13,17 +13,20 @@ const Register = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleRegistration(data);
   };
 
   return (
     <div className="register">
       <Logo title={"CryptoDucks"} />
       <p className="register__welcome">Please register.</p>
-      <form className="register__form">
+
+      <form className="register__form" onSubmit={handleSubmit}>
         <label htmlFor="username">Username:</label>
         <input
           id="username"
@@ -32,6 +35,7 @@ const Register = () => {
           value={data.username}
           onChange={handleChange}
         />
+
         <label htmlFor="email">Email:</label>
         <input
           id="email"
@@ -40,6 +44,7 @@ const Register = () => {
           value={data.email}
           onChange={handleChange}
         />
+
         <label htmlFor="password">Password:</label>
         <input
           id="password"
@@ -48,6 +53,7 @@ const Register = () => {
           value={data.password}
           onChange={handleChange}
         />
+
         <label htmlFor="confirmPassword">Confirm password:</label>
         <input
           id="confirmPassword"
@@ -56,15 +62,17 @@ const Register = () => {
           value={data.confirmPassword}
           onChange={handleChange}
         />
+
         <div className="register__button-container">
           <button type="submit" className="register__link">
             Sign up
           </button>
         </div>
       </form>
+
       <div className="register__signin">
         <p>Already a member?</p>
-        <Link to="login" className="register__login-link">
+        <Link to="/login" className="register__login-link">
           Log in here
         </Link>
       </div>

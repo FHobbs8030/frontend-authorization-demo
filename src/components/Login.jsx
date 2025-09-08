@@ -1,60 +1,60 @@
+// src/components/Login.jsx
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import Logo from "./Logo";
 import "./styles/Login.css";
 
-const Login = () => {
-  const [data, setData] = useState({
-    username: "",
-    password: "",
-  });
+const Login = ({ handleLogin }) => {
+  const [data, setData] = useState({ login: "", password: "" });
+  const [msg, setMsg] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const onSubmit = (e) => {
+    e.preventDefault();          // <-- stop default GET submit
+    setMsg("");
+    handleLogin(data).catch((err) => setMsg(String(err)));
   };
 
   return (
     <div className="login">
       <Logo title={"CryptoDucks"} />
       <p className="login__welcome">
-        This app contains highly sensitive information. Please sign in or
-        register to access CryptoDucks.
+        This app contains highly sensitive information. Please sign in or register to access CryptoDucks.
       </p>
-      <form className="login__form">
-        <label htmlFor="username">Login:</label>
+
+      <form className="login__form" onSubmit={onSubmit}>
+        <label htmlFor="login">Login:</label>
         <input
-          id="username"
-          required
-          name="username"
+          id="login"
+          name="login"          // matches state key
           type="text"
-          value={data.username}
+          value={data.login}
           onChange={handleChange}
         />
+
         <label htmlFor="password">Password:</label>
         <input
           id="password"
-          required
           name="password"
           type="password"
           value={data.password}
           onChange={handleChange}
         />
+
+        {msg && <p className="login__message">{msg}</p>}
+
         <div className="login__button-container">
-          <button type="submit" className="login__link">
-            Log in
-          </button>
+          <button type="submit" className="login__link">Log in</button>
         </div>
       </form>
 
       <div className="login__signup">
         <p>Not a member yet?</p>
-        <Link to="/register" className="signup__link">
-          Sign up here
-        </Link>
+        <Link to="/register" className="login__register-link">Sign up here</Link>
       </div>
     </div>
   );
