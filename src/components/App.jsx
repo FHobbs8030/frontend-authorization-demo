@@ -1,4 +1,3 @@
-// src/components/App.jsx
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
@@ -47,12 +46,17 @@ function App() {
     });
   };
 
+  const handleSignOut = () => {
+    localStorage.removeItem("jwt");
+    localStorage.removeItem("user");
+    setUser(null);
+    setIsLoggedIn(false);
+    navigate("/login", { replace: true });
+  };
+
   return (
     <Routes>
-      <Route
-        index
-        element={<Navigate to={isLoggedIn ? "/ducks" : "/login"} replace />}
-      />
+      <Route index element={<Navigate to={isLoggedIn ? "/ducks" : "/login"} replace />} />
       <Route
         path="/login"
         element={
@@ -81,7 +85,7 @@ function App() {
         path="/ducks"
         element={
           <ProtectedRoute isLoggedIn={isLoggedIn}>
-            <Ducks />
+            <Ducks onSignOut={handleSignOut} />
           </ProtectedRoute>
         }
       />
@@ -89,7 +93,7 @@ function App() {
         path="/my-profile"
         element={
           <ProtectedRoute isLoggedIn={isLoggedIn}>
-            <MyProfile user={user} />
+            <MyProfile user={user} onSignOut={handleSignOut} />
           </ProtectedRoute>
         }
       />
