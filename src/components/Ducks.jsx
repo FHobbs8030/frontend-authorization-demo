@@ -1,18 +1,20 @@
-import { Link } from "react-router-dom";
 import "./styles/Ducks.css";
 
-export default function Ducks({ onSignOut }) {
-  return (
-    <div className="ducks">
-      <nav className="topnav">
-        <Link to="/ducks">Ducks</Link>
-        <Link to="/my-profile">My Profile</Link>
-        <button className="signout" onClick={onSignOut}>Sign Out</button>
-      </nav>
+const DUCKS = [
+  { id: 1, name: "Mallard", img: "/ducks/mallard.jpg" },
+  { id: 2, name: "Teal",    img: "/ducks/teal.jpg" },
+  { id: 3, name: "Pintail", img: "/ducks/pintail.jpg" }
+];
 
-      <div className="ducks__content">
-        {/* ... */}
-      </div>
-    </div>
+export default function Ducks() {
+  return (
+    <main className="ducks">
+      {DUCKS.map((d) => (
+        <article key={d.id} className="duck-card">
+          <img src={d.img} alt={d.name} />
+          <h3>{d.name}</h3>
+        </article>
+      ))}
+    </main>
   );
 }

@@ -1,108 +1,120 @@
-import { useState, useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Routes, Route, Navigate, useNavigate, Link } from "react-router-dom";
+import Ducks from "./Ducks.jsx";
+import Profile from "./Profile.jsx";
+import ProtectedRoute from "./ProtectedRoute.jsx";
 
-import Ducks from "./Ducks";
-import Login from "./Login";
-import MyProfile from "./MyProfile";
-import Register from "./Register";
-import ProtectedRoute from "./ProtectedRoute";
-import "./styles/App.css";
-import * as auth from "../utils/auth";
+function SignIn({ onSubmit }) {
+  return (
+    <main className="page">
+      <h2>Sign In</h2>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const email = e.target.email.value;
+          onSubmit({ email });
+        }}
+      >
+        <input name="email" type="email" placeholder="email" required />
+        <input name="password" type="password" placeholder="password" required />
+        <button type="submit">Sign In</button>
+      </form>
+      <Link to="/signup">Register</Link>
+    </main>
+  );
+}
 
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
+function SignUp({ onSubmit }) {
+  return (
+    <main className="page">
+      <h2>Sign Up</h2>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const name = e.target.name.value;
+          const email = e.target.email.value;
+          onSubmit({ name, email });
+        }}
+      >
+        <input name="name" placeholder="name" required />
+        <input name="email" type="email" placeholder="email" required />
+        <input name="password" type="password" placeholder="password" required />
+        <button type="submit">Create Account</button>
+      </form>
+      <Link to="/signin">Have an account? Sign In</Link>
+    </main>
+  );
+}
+
+export default function App() {
   const navigate = useNavigate();
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const jwt = localStorage.getItem("jwt");
-    const storedUser = localStorage.getItem("user");
-    if (jwt) setIsLoggedIn(true);
-    if (storedUser) setUser(JSON.parse(storedUser));
+    const token = localStorage.getItem("jwt");
+    if (!token) return;
+    setLoggedIn(true);
+    setUser({ name: "Fred", email: "fred@example.com" });
   }, []);
 
-  const handleRegistration = ({ username, email, password, confirmPassword }) => {
-    if (password !== confirmPassword) return Promise.reject("Passwords do not match");
-    return auth.register(username, password, email).then(() => {
-      navigate("/login");
-    });
+  const handleSignIn = async ({ email }) => {
+    const token = "mock-token";
+    localStorage.setItem("jwt", token);
+    setLoggedIn(true);
+    setUser({ name: "Fred", email });
+    navigate("/");
   };
 
-  const handleLogin = ({ login, password }) => {
-    return auth.authorize(login, password).then((payload) => {
-      const jwt = payload?.jwt;
-      const userObj = payload?.user || payload?.data?.user || payload?.userData || null;
-      if (!jwt) return Promise.reject("No token returned from server");
-      localStorage.setItem("jwt", jwt);
-      if (userObj) {
-        localStorage.setItem("user", JSON.stringify(userObj));
-        setUser(userObj);
-      } else {
-        localStorage.removeItem("user");
-        setUser(null);
-      }
-      setIsLoggedIn(true);
-      navigate("/ducks", { replace: true });
-    });
+  const handleSignUp = async ({ name, email }) => {
+    const token = "mock-token";
+    localStorage.setItem("jwt", token);
+    setLoggedIn(true);
+    setUser({ name, email });
+    navigate("/");
   };
 
   const handleSignOut = () => {
     localStorage.removeItem("jwt");
-    localStorage.removeItem("user");
+    setLoggedIn(false);
     setUser(null);
-    setIsLoggedIn(false);
-    navigate("/login", { replace: true });
+    navigate("/signin");
   };
 
   return (
-    <Routes>
-      <Route index element={<Navigate to={isLoggedIn ? "/ducks" : "/login"} replace />} />
-      <Route
-        path="/login"
-        element={
-          isLoggedIn ? (
-            <Navigate to="/ducks" replace />
-          ) : (
-            <div className="loginContainer">
-              <Login handleLogin={handleLogin} />
-            </div>
-          )
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          isLoggedIn ? (
-            <Navigate to="/ducks" replace />
-          ) : (
-            <div className="registerContainer">
-              <Register handleRegistration={handleRegistration} />
-            </div>
-          )
-        }
-      />
-      <Route
-        path="/ducks"
-        element={
-          <ProtectedRoute isLoggedIn={isLoggedIn}>
-            <Ducks onSignOut={handleSignOut} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/my-profile"
-        element={
-          <ProtectedRoute isLoggedIn={isLoggedIn}>
-            <MyProfile user={user} onSignOut={handleSignOut} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="*"
-        element={isLoggedIn ? <Navigate to="/ducks" replace /> : <Navigate to="/login" replace />}
-      />
-    </Routes>
+    <div className="page">
+      <header className="topbar">
+        <nav className="nav">
+          <Link to="/">Ducks</Link>
+          <Link to="/profile">My Profile</Link>
+        </nav>
+        {loggedIn && <button onClick={handleSignOut}>Sign Out</button>}
+      </header>
+
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <Ducks />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute loggedIn={loggedIn}>
+              <Profile user={user} />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/signin" element={<SignIn onSubmit={handleSignIn} />} />
+        <Route path="/signup" element={<SignUp onSubmit={handleSignUp} />} />
+        <Route
+          path="*"
+          element={<Navigate to={loggedIn ? "/" : "/signin"} replace />}
+        />
+      </Routes>
+    </div>
   );
 }
-
-export default App;
