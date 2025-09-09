@@ -1,24 +1,15 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
-async function req(path, { method = "GET", body, token } = {}) {
-  const headers = { "Content-Type": "application/json" };
-  if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!res.ok) {
-    const msg = await res.text().catch(() => "");
-    throw new Error(msg || `HTTP ${res.status}`);
-  }
-  return res.json();
-}
+export const authorize = (email, password) =>
+  fetch(`${BASE_URL}/signin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  }).then((res) => (res.ok ? res.json() : Promise.reject(res)));
 
-export function authorize(email, password) {
-  return req("/signin", { method: "POST", body: { email, password } });
-}
-
-export function register(name, email, password) {
-  return req("/signup", { method: "POST", body: { name, email, password } });
-}
+export const register = (name, email, password) =>
+  fetch(`${BASE_URL}/signup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password }),
+  }).then((res) => (res.ok ? res.json() : Promise.reject(res)));
