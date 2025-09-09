@@ -6,6 +6,7 @@ import ProtectedRoute from "./ProtectedRoute.jsx";
 import { authorize, register } from "../utils/auth.js";
 import { getUserInfo } from "../utils/api.js";
 import { setToken, getToken, clearToken } from "../utils/token.js";
+import AppContext from "../context/AppContext.jsx";
 
 function SignIn({ onSubmit, error, loading }) {
   return (
@@ -135,51 +136,53 @@ export default function App() {
   }
 
   return (
-    <div className="page">
-      <header className="topbar">
-        <nav className="nav">
-          <Link to="/ducks">Ducks</Link>
-          <Link to="/my-profile">My Profile</Link>
-        </nav>
-        {isLoggedIn && <button onClick={handleSignOut}>Sign Out</button>}
-      </header>
+    <AppContext.Provider value={{ isLoggedIn, setIsLoggedIn, userData, setUserData, signOut: handleSignOut }}>
+      <div className="page">
+        <header className="topbar">
+          <nav className="nav">
+            <Link to="/ducks">Ducks</Link>
+            <Link to="/my-profile">My Profile</Link>
+          </nav>
+          {isLoggedIn && <button onClick={handleSignOut}>Sign Out</button>}
+        </header>
 
-      <Routes>
-        <Route path="/" element={<Navigate to={isLoggedIn ? "/ducks" : "/signin"} replace />} />
-        <Route
-          path="/ducks"
-          element={
-            <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <Ducks />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/my-profile"
-          element={
-            <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <MyProfile userData={userData} />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/signin"
-          element={
-            <ProtectedRoute isLoggedIn={isLoggedIn} anonymous>
-              <SignIn onSubmit={handleLogin} error={authError} loading={authLoading} />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <ProtectedRoute isLoggedIn={isLoggedIn} anonymous>
-              <SignUp onSubmit={handleSignUp} error={authError} loading={authLoading} />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to={isLoggedIn ? "/ducks" : "/signin"} replace />} />
-      </Routes>
-    </div>
+        <Routes>
+          <Route path="/" element={<Navigate to={isLoggedIn ? "/ducks" : "/signin"} replace />} />
+          <Route
+            path="/ducks"
+            element={
+              <ProtectedRoute>
+                <Ducks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-profile"
+            element={
+              <ProtectedRoute>
+                <MyProfile userData={userData} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/signin"
+            element={
+              <ProtectedRoute anonymous>
+                <SignIn onSubmit={handleLogin} error={authError} loading={authLoading} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <ProtectedRoute anonymous>
+                <SignUp onSubmit={handleSignUp} error={authError} loading={authLoading} />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to={isLoggedIn ? "/ducks" : "/signin"} replace />} />
+        </Routes>
+      </div>
+    </AppContext.Provider>
   );
 }
