@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useNavigate, useLocation, Link } from "react-router-dom";
 import Ducks from "./Ducks.jsx";
 import MyProfile from "./MyProfile.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
-import PublicOnlyRoute from "./PublicOnlyRoute.jsx";
 import { authorize, register } from "../utils/auth.js";
 import { getUserInfo } from "../utils/api.js";
 import { setToken, getToken, clearToken } from "../utils/token.js";
@@ -59,7 +58,6 @@ function SignUp({ onSubmit, error, loading }) {
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const initialDestRef = useRef(location.state?.from?.pathname || null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [booting, setBooting] = useState(true);
@@ -83,7 +81,7 @@ export default function App() {
         setIsLoggedIn(false);
       })
       .finally(() => setBooting(false));
-  }, [navigate]);
+  }, []);
 
   const handleLogin = async ({ email, password }) => {
     try {
@@ -94,8 +92,8 @@ export default function App() {
       const me = await getUserInfo(token);
       setUserData({ username: me.name || me.username || "", email: me.email || "" });
       setIsLoggedIn(true);
-      const dest = initialDestRef.current || "/ducks";
-      navigate(dest, { replace: true });
+      const redirectPath = location.state?.from?.pathname || "/ducks";
+      navigate(redirectPath, { replace: true });
     } catch {
       setAuthError("Sign-in failed.");
     } finally {
@@ -112,7 +110,8 @@ export default function App() {
       const me = await getUserInfo(token);
       setUserData({ username: me.name || me.username || "", email: me.email || "" });
       setIsLoggedIn(true);
-      navigate("/ducks", { replace: true });
+      const redirectPath = location.state?.from?.pathname || "/ducks";
+      navigate(redirectPath, { replace: true });
     } catch {
       setAuthError("Sign-up failed.");
     } finally {
@@ -150,7 +149,7 @@ export default function App() {
         <Route
           path="/ducks"
           element={
-            <ProtectedRoute loggedIn={isLoggedIn}>
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
               <Ducks />
             </ProtectedRoute>
           }
@@ -158,7 +157,7 @@ export default function App() {
         <Route
           path="/my-profile"
           element={
-            <ProtectedRoute loggedIn={isLoggedIn}>
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
               <MyProfile userData={userData} />
             </ProtectedRoute>
           }
@@ -166,17 +165,17 @@ export default function App() {
         <Route
           path="/signin"
           element={
-            <PublicOnlyRoute loggedIn={isLoggedIn}>
+            <ProtectedRoute isLoggedIn={isLoggedIn} anonymous>
               <SignIn onSubmit={handleLogin} error={authError} loading={authLoading} />
-            </PublicOnlyRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/signup"
           element={
-            <PublicOnlyRoute loggedIn={isLoggedIn}>
+            <ProtectedRoute isLoggedIn={isLoggedIn} anonymous>
               <SignUp onSubmit={handleSignUp} error={authError} loading={authLoading} />
-            </PublicOnlyRoute>
+            </ProtectedRoute>
           }
         />
         <Route path="*" element={<Navigate to={isLoggedIn ? "/ducks" : "/signin"} replace />} />

@@ -1,30 +1,14 @@
+import { useContext } from "react";
 import { NavLink } from "react-router-dom";
-import Logo from "./Logo";
-import "./styles/NavBar.css";
+import AppContext from "../context/AppContext.jsx";
 
-function NavBar() {
+export default function NavBar() {
+  const { signOut, isLoggedIn } = useContext(AppContext);
   return (
-    <div className="navbar">
-      <div className="navbar__logo">
-        <Logo />
-      </div>
-      <ul className="navbar__nav">
-        <li>
-          <NavLink to="/ducks" className="navbar__link">
-            Ducks
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/my-profile" className="navbar__link">
-            My Profile
-          </NavLink>
-        </li>
-        <li>
-          <button className="navbar__link navbar__button">Sign Out</button>
-        </li>
-      </ul>
-    </div>
+    <ul>
+      <li><NavLink to="/ducks">Ducks</NavLink></li>
+      <li><NavLink to="/my-profile">My Profile</NavLink></li>
+      {isLoggedIn && <li><button onClick={signOut}>Sign Out</button></li>}
+    </ul>
   );
 }
-
-export default NavBar;
