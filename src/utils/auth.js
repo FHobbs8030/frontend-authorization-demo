@@ -22,7 +22,3 @@ export function authorize(email, password) {
 export function register(name, email, password) {
   return req("/signup", { method: "POST", body: { name, email, password } });
 }
-
-export function getMe(token) {
-  return req("/users/me", { token });
-}

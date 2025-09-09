@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Routes, Route, Navigate, useNavigate, useLocation, Link } from "react-router-dom";
 import Ducks from "./Ducks.jsx";
 import MyProfile from "./MyProfile.jsx";
@@ -59,27 +59,31 @@ function SignUp({ onSubmit, error, loading }) {
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const initialDestRef = useRef(location.state?.from?.pathname || null);
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [booting, setBooting] = useState(true);
   const [userData, setUserData] = useState({ username: "", email: "" });
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
 
   useEffect(() => {
     const jwt = getToken();
-    if (!jwt) return;
-
+    if (!jwt) {
+      setBooting(false);
+      return;
+    }
     getUserInfo(jwt)
       .then((me) => {
         setUserData({ username: me.name || me.username || "", email: me.email || "" });
         setIsLoggedIn(true);
-        const dest = location.state?.from?.pathname || "/ducks";
-        navigate(dest, { replace: true });
       })
       .catch(() => {
         clearToken();
         setIsLoggedIn(false);
-      });
-  }, [navigate, location]);
+      })
+      .finally(() => setBooting(false));
+  }, [navigate]);
 
   const handleLogin = async ({ email, password }) => {
     try {
@@ -90,9 +94,9 @@ export default function App() {
       const me = await getUserInfo(token);
       setUserData({ username: me.name || me.username || "", email: me.email || "" });
       setIsLoggedIn(true);
-      const dest = location.state?.from?.pathname || "/ducks";
+      const dest = initialDestRef.current || "/ducks";
       navigate(dest, { replace: true });
-    } catch (e) {
+    } catch {
       setAuthError("Sign-in failed.");
     } finally {
       setAuthLoading(false);
@@ -109,7 +113,7 @@ export default function App() {
       setUserData({ username: me.name || me.username || "", email: me.email || "" });
       setIsLoggedIn(true);
       navigate("/ducks", { replace: true });
-    } catch (e) {
+    } catch {
       setAuthError("Sign-up failed.");
     } finally {
       setAuthLoading(false);
@@ -123,6 +127,14 @@ export default function App() {
     navigate("/signin", { replace: true });
   };
 
+  if (booting) {
+    return (
+      <div className="page">
+        <main className="page" style={{ padding: 24 }}>Loading…</main>
+      </div>
+    );
+  }
+
   return (
     <div className="page">
       <header className="topbar">
@@ -134,7 +146,7 @@ export default function App() {
       </header>
 
       <Routes>
-        <Route path="/" element={<Navigate to="/ducks" replace />} />
+        <Route path="/" element={<Navigate to={isLoggedIn ? "/ducks" : "/signin"} replace />} />
         <Route
           path="/ducks"
           element={

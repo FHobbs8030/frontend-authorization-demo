@@ -7,6 +7,27 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.topbar {
+  position: sticky;   
+  top: 0;
+  z-index: 1000;
+  background: #fff;
+}
+
+.nav a {
+  cursor: pointer;
+}
+
+.page main,
+.ducks,
+.duck-list,
+.duckGrid,
+.content {
+  position: relative;
+  z-index: 0;
+}
+
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
